@@ -6,13 +6,12 @@ from dotenv import load_dotenv
 
 load_dotenv(join(dirname(__file__),'.env'))
 
-USERNAME = os.environ['SSO_USERNAME']
-PASSWORD = os.environ['SSO_PASSWORD']
-
+# From .env file
+USERNAME = os.environ.get('SSO_USERNAME', '')
+PASSWORD = os.environ.get('SSO_PASSWORD', '')
 
 #HTTP POST to it
 auth_url = 'https://academic.ui.ac.id/main/Authentication/Index'
-data = {'u':USERNAME,'p':PASSWORD}
 
 #HTTP GET to it
 change_role_url = 'https://academic.ui.ac.id/main/Authentication/ChangeRole' 
@@ -24,19 +23,46 @@ course_plan_url = 'https://academic.ui.ac.id/main/CoursePlan/CoursePlanEdit'
 
 #HTTP POST to it
 course_save_url = 'https://academic.ui.ac.id/main/CoursePlan/CoursePlanSave'
-course = {'c[COURSECODE_CURRICULUM]':'number-sks','comment':'','submit':'Simpan IRS'}
 
-sess = requests.Session()
-sess.post(auth_url,data=data)
-sess.get(change_role_url)
+course = {
+    'c[{COURSECODE}_{CURRICULUM}]':'{CLASS}-{SKS}' ,
+    # e.g:'c[CSGE614093_01.00.12.01-2016]':'592114-3',
+    'comment':'',
+    'submit':'Simpan IRS'}
 
-r = sess.get(course_plan_url)
-soup = BeautifulSoup(r.content,'html.parser')
+error = True
+counter = 1
+while error:
+    print('[{}]'.format(counter), end=' ')
+    counter += 1
 
-tokens = soup.input['value']
+    sess = requests.Session()
+
+    # Authentication
+    data = {'u':USERNAME,'p':PASSWORD}
+    sess.post(auth_url,data=data)
+    sess.get(change_role_url)
+
+    # Get Token
+    r = sess.get(course_plan_url)
+    soup = BeautifulSoup(r.content,'html.parser')
+
+    try:
+        tokens = soup.input['value']
+        if not tokens:
+            print(soup.select_one('#info h3 a')['href'])
+            continue
+    except:
+        try:
+            print(soup.select_one('h2#ti_h').text)
+        except:
+            print(soup.select_one('.container p').text)
+        continue
+    
+
+    error = False
+
+# Post Course
 course['tokens'] = tokens
-
-print(tokens)	
-
-
+sess.post(course_save_url, data=course)
 
