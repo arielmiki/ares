@@ -43,7 +43,7 @@ payload = {
     }
 with open('course.json') as f:
     course = json.load(f)
-course_data = {**payload, **course}
+course_data = {**course, **payload}
 print("[*] Save course data:\n", json.dumps(course_data, indent=4), sep='')
 
 error = True
