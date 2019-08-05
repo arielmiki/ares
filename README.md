@@ -10,7 +10,7 @@ Ares in Greek mythology is the God of war. So, if you want to win the war you sh
 SSO_USERNAME=username
 SSO_PASSWORD=password
 ```
-5. Set `course` dictionary at `war.py` with your favorite course :) with key `'c[{COURSECODE}_{CURRICULUM}]'` and value `'{CLASS}-{SKS}'`
+5. Create `json` file with name `course.json` and fill with key `'c[{COURSECODE}_{CURRICULUM}]'` dan value `'{CLASSCODE}-{SKS}'`. You can look at `example.json` for further explanation.
 6. Run with `python war.py`
 7. Have fun!
 
